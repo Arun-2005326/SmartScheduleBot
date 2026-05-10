@@ -49,12 +49,22 @@ def get_sheet():
 # ─── SHEETS HELPERS ────────────────────────────────────────────────────────
 def load_tasks(chat_id):
     sheet = get_sheet()
+
     all_rows = sheet.get_all_records()
-    tasks = [
-        {"time": r["time"], "task": r["task"], "row": i + 2}
-        for i, r in enumerate(all_rows)
-        if str(r["chat_id"]) == str(chat_id)
-    ]
+
+    tasks = []
+
+    for i, r in enumerate(all_rows):
+        try:
+            if str(r.get("chat_id")) == str(chat_id):
+                tasks.append({
+                    "time": r.get("time", ""),
+                    "task": r.get("task", ""),
+                    "row": i + 2
+                })
+        except Exception:
+            continue
+
     return sorted(tasks, key=lambda x: x["time"])
  
 def save_task(chat_id, time, task):
