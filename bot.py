@@ -200,6 +200,10 @@ def delete_task_by_index(chat_id, index):
     }
 
     return True, removed
+
+async def cancel(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("❌ Cancelled.")
+    return ConversationHandler.END
  
 # ─── HOURLY REMINDER ───────────────────────────────────────────────────────
 async def hourly_reminder(app):
