@@ -1,4 +1,6 @@
 import logging
+import os
+import json
 import asyncio
 import gspread
 from datetime import datetime
@@ -26,14 +28,22 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
 ]
- 
+
 def get_sheet():
-    creds = Credentials.from_service_account_file(CREDS_FILE, scopes=SCOPES)
+    google_creds = json.loads(os.getenv("GOOGLE_CREDENTIALS"))
+
+    creds = Credentials.from_service_account_info(
+        google_creds,
+        scopes=SCOPES
+    )
+
     client = gspread.authorize(creds)
     sheet = client.open_by_key(SHEET_ID).sheet1
+
     if sheet.row_count == 0 or sheet.cell(1, 1).value != "chat_id":
         sheet.clear()
         sheet.append_row(["chat_id", "time", "task", "added_on"])
+
     return sheet
  
 # ─── SHEETS HELPERS ────────────────────────────────────────────────────────
