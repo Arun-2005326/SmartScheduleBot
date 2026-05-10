@@ -204,6 +204,53 @@ def delete_task_by_index(chat_id, index):
 async def cancel(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("❌ Cancelled.")
     return ConversationHandler.END
+
+# ─── DELETE TASK ───────────────────────────────────────────────────────────
+async def delete_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+
+    await update.message.reply_text("⏳ Loading tasks...")
+
+    tasks = load_tasks(chat_id)
+
+    if not tasks:
+        await update.message.reply_text("📭 No tasks to delete.")
+        return ConversationHandler.END
+
+    await update.message.reply_text(
+        format_schedule(chat_id) + "\n\nEnter the *number* of the task to delete:",
+        parse_mode="Markdown"
+    )
+
+    return AWAIT_DELETE
+
+
+async def delete_task(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+
+    try:
+        num = int(update.message.text.strip())
+
+        await update.message.reply_text("⏳ Deleting...")
+
+        success, removed = delete_task_by_index(chat_id, num - 1)
+
+        if success:
+            await update.message.reply_text(
+                f"✅ Deleted: 🕐 *{removed['time']}* — {removed['task']}",
+                parse_mode="Markdown"
+            )
+        else:
+            await update.message.reply_text(
+                "⚠️ Invalid number. Try /delete again."
+            )
+
+    except ValueError:
+        await update.message.reply_text(
+            "⚠️ Please enter a valid number."
+        )
+
+    return ConversationHandler.END
  
 # ─── HOURLY REMINDER ───────────────────────────────────────────────────────
 async def hourly_reminder(app):
